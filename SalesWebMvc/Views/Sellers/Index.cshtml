@@ -43,7 +43,7 @@
                             @Html.DisplayFor(modelItem => item.BirthDate)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.BaseSalary)
+                            $ @Html.DisplayFor(modelItem => item.BaseSalary)
                         </td>
                         <td>
                             <a class="action-icon" asp-action="Edit" asp-route-id="@item.Id" data-toggle="tooltip" data-placement="top" title="Edit">
