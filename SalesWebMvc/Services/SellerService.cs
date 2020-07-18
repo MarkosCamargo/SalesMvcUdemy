@@ -4,6 +4,7 @@ using SalesWebMvc.Models;
 using SalesWebMvc.Services.Exceptions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SalesWebMvc.Services
 {
@@ -22,51 +23,52 @@ namespace SalesWebMvc.Services
         /// <summary>
         /// Retorna todos os Sellers do banco de dados
         /// </summary>
-        public List<Seller> FindAll()
+        public async Task<List<Seller>> FindAllAsync()
         {
-            return _context.Seller.ToList();
+            return await _context.Seller.ToListAsync();
         }
 
         /// <summary>
         /// Retorna todos os Sellers do banco de dados
         /// </summary>
-        public Seller FindById(int id, bool usingJoin)
+        public async Task<Seller> FindByIdAsync(int id, bool usingJoin)
         {
-            return usingJoin ? _context.Seller.Include(Seller => Seller.Department).FirstOrDefault(seller => seller.Id == id) : _context.Seller.FirstOrDefault(seller => seller.Id == id);
+            return  usingJoin ? await _context.Seller.Include(Seller => Seller.Department).FirstOrDefaultAsync(seller => seller.Id == id) : await _context.Seller.FirstOrDefaultAsync(seller => seller.Id == id);
         }
 
         /// <summary>
         /// Salva um objeto Seller do banco de dados
         /// </summary>
-        public void Insert(Seller seller)
+        public async Task InsertAsync(Seller seller)
         {
             _context.Add(seller);
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
         }
 
         /// <summary>
         /// Salva um objeto Seller do banco de dados
         /// </summary>
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var seller = _context.Seller.Find(id);
+            var seller =await _context.Seller.FindAsync(id);
             _context.Seller.Remove(seller);
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
         }
 
         /// <summary>
         /// Salva um objeto Seller do banco de dados
         /// </summary>
-        public void Update(Seller seller)
+        public async Task UpdateAsync(Seller seller)
         {
-            if (!_context.Seller.Any(x => x.Id == seller.Id))
+            bool hasAny = await _context.Seller.AnyAsync(x => x.Id == seller.Id);
+            if (!hasAny)
             {
                 throw new NotFoundException("Id Not Found");
             }
             try
             {
                 _context.Update(seller);
-                _context.SaveChanges();
+                await  _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
             {
