@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SalesWebMvc.Models;
+using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
 
 namespace SalesWebMvc.Controllers
@@ -15,13 +16,18 @@ namespace SalesWebMvc.Controllers
         * <summary>Serviço Seller(ModelBO)</summary>
         */
         private readonly SellerService _sellersService;
+        /**
+        * <summary>Serviço Departmet(ModelBO)</summary>
+        */
+        private readonly DepartmentService _departmentService;
 
         /// <summary>
         /// Construtor com injeção de dependencia, definida no Startup.cs
         /// </summary>
-        public SellersController(SellerService sellersService)
+        public SellersController(SellerService sellersService, DepartmentService departmentService)
         {
             _sellersService = sellersService;
+            _departmentService = departmentService;
         }
 
         public IActionResult Index()
@@ -32,7 +38,9 @@ namespace SalesWebMvc.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            var departments = _departmentService.FindAll();
+            var viewModel = new SellerFormViewModel { Departments = departments };
+            return View(viewModel);
         }
 
         [HttpPost]
