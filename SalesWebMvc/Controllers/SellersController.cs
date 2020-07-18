@@ -2,6 +2,8 @@
 using SalesWebMvc.Models;
 using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
+using SalesWebMvc.Services.Exceptions;
+using System.Collections.Generic;
 
 namespace SalesWebMvc.Controllers
 {
@@ -11,7 +13,7 @@ namespace SalesWebMvc.Controllers
         /**
         * <summary>Serviço Seller(ModelBO)</summary>
         */
-        private readonly SellerService _sellersService;
+        private readonly SellerService _sellerService;
         /**
         * <summary>Serviço Departmet(ModelBO)</summary>
         */
@@ -22,13 +24,13 @@ namespace SalesWebMvc.Controllers
         /// </summary>
         public SellersController(SellerService sellersService, DepartmentService departmentService)
         {
-            _sellersService = sellersService;
+            _sellerService = sellersService;
             _departmentService = departmentService;
         }
 
         public IActionResult Index()
         {
-            var list = _sellersService.FindAll();
+            var list = _sellerService.FindAll();
             return View(list);
         }
 
@@ -43,7 +45,7 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Seller seller)
         {
-            _sellersService.Insert(seller);
+            _sellerService.Insert(seller);
             return RedirectToAction(nameof(Index));
         }
 
@@ -54,7 +56,7 @@ namespace SalesWebMvc.Controllers
                 return NotFound();
             }
 
-            var seller = _sellersService.FindById(id.Value, false);
+            var seller = _sellerService.FindById(id.Value, false);
             if (seller == null)
             {
                 return NotFound();
@@ -66,7 +68,7 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            _sellersService.Delete(id);
+            _sellerService.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -77,12 +79,52 @@ namespace SalesWebMvc.Controllers
                 return NotFound();
             }
 
-            var seller = _sellersService.FindById(id.Value, true);
+            var seller = _sellerService.FindById(id.Value, true);
             if (seller == null)
             {
                 return NotFound();
             }
             return View(seller);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var seller = _sellerService.FindById(id.Value, true);
+            if (seller == null)
+            {
+                return NotFound();
+            }
+
+            List<Department> departments = _departmentService.FindAll();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            if (id != seller.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                _sellerService.Update(seller);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException) 
+            {
+                return NotFound();
+            }
+            catch (DbConcurrencyException)
+            {
+                return BadRequest();
+            }
         }
     }
 }
