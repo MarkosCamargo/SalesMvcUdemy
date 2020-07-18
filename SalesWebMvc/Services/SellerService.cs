@@ -3,7 +3,6 @@ using SalesWebMvc.Data;
 using SalesWebMvc.Models;
 using SalesWebMvc.Services.Exceptions;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SalesWebMvc.Services
@@ -50,9 +49,16 @@ namespace SalesWebMvc.Services
         /// </summary>
         public async Task DeleteAsync(int id)
         {
-            var seller =await _context.Seller.FindAsync(id);
-            _context.Seller.Remove(seller);
-           await _context.SaveChangesAsync();
+            try
+            {
+                var seller = await _context.Seller.FindAsync(id);
+                _context.Seller.Remove(seller);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException) 
+            {
+                throw new  IntegrityException("The seller cannot be deleted because he/she has sales");
+            }
         }
 
         /// <summary>
