@@ -54,7 +54,7 @@ namespace SalesWebMvc.Controllers
                 return NotFound();
             }
 
-            var seller = _sellersService.FindById(id.Value);
+            var seller = _sellersService.FindById(id.Value, false);
             if (seller == null)
             {
                 return NotFound();
@@ -68,6 +68,21 @@ namespace SalesWebMvc.Controllers
         {
             _sellersService.Delete(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var seller = _sellersService.FindById(id.Value, true);
+            if (seller == null)
+            {
+                return NotFound();
+            }
+            return View(seller);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SalesWebMvc.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SalesWebMvc.Data;
 using SalesWebMvc.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,9 +29,9 @@ namespace SalesWebMvc.Services
         /// <summary>
         /// Retorna todos os Sellers do banco de dados
         /// </summary>
-        public Seller FindById(int id)
+        public Seller FindById(int id, bool usingJoin)
         {
-            return _context.Seller.FirstOrDefault(seller => seller.Id == id);
+            return usingJoin ? _context.Seller.Include(Seller => Seller.Department).FirstOrDefault(seller => seller.Id == id) : _context.Seller.FirstOrDefault(seller => seller.Id == id);
         }
 
         /// <summary>
